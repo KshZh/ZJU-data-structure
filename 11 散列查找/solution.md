@@ -122,7 +122,9 @@ int main() {
 ## 11-散列4 Hashing - Hard Version (30 分)
 
 1. 第一段代码是通过观察测试样例写出来的，无法通过最后一个测试。
-2. TODO
+2. 其实如果多个Key通过hash以及线性退避后映射到同一个slot，那么已经在slot上的key一定是先于要找位置插入的key插入的。通过这个现象，我们可以画出一个DAG（有向无环图）。然后使用拓扑排序来解决问题。
+3. 当元素之间有明确的先后关系的时候（也许可以构成DAG），可以考虑是否跟拓扑排序有关，用拓扑排序来生成序列。
+4. std::priority_queue在头文件<queue>中。
 
 ```cpp
 // A negative integer represents an empty cell in the hash table.
@@ -174,6 +176,82 @@ int main() {
             }
         }
     }
+    printf("%d", res[0]);
+    for (i=1; i<res.size(); i++)
+        printf(" %d", res[i]);
+    printf("\n");
+}
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_map>
+#include <algorithm>
+using namespace std;
+
+int N;
+
+unordered_map<int, int> idx;
+unordered_map<int, vector<int>> edge;
+vector<pair<int, int>> seq; // p.first是输入的非负数，p.second是该顶点的入度。
+vector<int> res;
+
+int hash_(int x) {
+    return x%N;
+}
+
+void topSort() {
+    // queue<int> q;
+	// 这里要用一个优先队列，总是先取最小的元素。greater表示大的元素放前面，但对优先队列来说，作用相反，小的在前面，先被取出来。
+    priority_queue<int, vector<int>, greater<int>> q;
+    int x;
+    // 将所有入度为0的顶点入队。
+    for (auto& p: seq) {
+        if (p.second == 0) {
+            q.push(p.first);
+        }
+    }
+    while (!q.empty()) {
+        // x = q.front();
+        x = q.top();
+        q.pop();
+        res.push_back(x);
+        for (int y: edge[x]) {
+            seq[idx[y]].second--;
+            if (seq[idx[y]].second == 0)
+                q.push(y);
+        }
+    }
+}
+
+int main() {
+    int i, h, pos;
+    scanf("%d", &N);
+    vector<int> table(N);
+    for (i=0; i<N; i++) {
+        scanf("%d", &table[i]);
+        if (table[i] >= 0) {
+            seq.push_back(pair<int, int>(table[i], 0));
+            idx[table[i]] = seq.size()-1;
+        }
+    }
+    for (auto& p: seq) {
+        h = hash_(p.first);
+        for (i=0; ; i++) {
+            // pos = h+i; // 错误。
+            // pos = h+i%N; // 错误。
+            pos = (h+i)%N;
+            if (table[pos] != p.first) {
+                edge[table[pos]].push_back(p.first); // table[pos]比x先插入，故table[pos]有一条指向x的边。
+                seq[idx[p.first]].second++;
+            } else {
+                break;
+            }
+        }
+    }
+    topSort();
     printf("%d", res[0]);
     for (i=1; i<res.size(); i++)
         printf(" %d", res[i]);
