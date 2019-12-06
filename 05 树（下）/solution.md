@@ -96,7 +96,7 @@ int main() {
         }
         scanf("%c", &cmd);
     }
-	// 判断集合个数。
+	// 判断集合个数，也就是看有多少个头目。
     for (i=1, n=0; i<=N; i++) {
         if (disjoint[i] == i)
             n++;
@@ -241,7 +241,7 @@ bool allPrefixCode(unordered_map<char, string>& codes) {
 int calculateWPL(const unordered_map<char, string>& codes) {
     int WPL = 0;
     for (auto& p: codes)
-        WPL += weights[p.first] * p.second.size();
+        WPL += weights[p.first] * p.second.size(); // 权值乘以路径长度，也就是编码长度。
     return WPL;
 }
 

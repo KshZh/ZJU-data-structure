@@ -254,7 +254,7 @@ int main() {
         printf("1\n");
         return 0;
     }
-    // XXX If there are many shortest paths, just output the one with the minimum first jump, which is guaranteed to be unique. 所以先对输入序列排序，在BFS/DFS。
+    // XXX If there are many shortest paths, just output the one with the minimum first jump, which is guaranteed to be unique. 所以先对输入序列排序，再BFS/DFS。
     sort(vertexes.begin()+1, vertexes.end(), cmp);
     fill(visited.begin(), visited.end(), false);
     bfs();
