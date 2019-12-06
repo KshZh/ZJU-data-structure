@@ -1,0 +1,40 @@
+1
+对于线性表，在顺序存储结构和链式存储结构中查找第k个元素，其时间复杂性分别是多少？
+
+A. 都是O(1)
+B. 都是O(k)
+C. O(1)和O(k)
+D. O(k)和O(1)
+
+正确答案：C。
+
+2
+在顺序结构表示的线性表中，删除第i个元素（数组下标为i-1)，需要把后面的所有元素都往前挪一位，相应的语句是：
+	for (___________ )
+        PtrL->Data[j-1]=PtrL->Data[j];  
+其中空缺部分的内容应该是
+
+A. j = i; j< = PtrL->Last; j++
+B. j =PtrL->Last; j>= i;  j--
+C. j = i-1; j< = PtrL->Last; j++
+D. j =PtrL->Last; j>= i-1;  j--
+
+正确答案：A。
+
+
+3
+下列函数试图求链式存储的线性表的表长，是否正确？
+
+int  Length ( List  *PtrL )
+{    
+	List  *p = PtrL;      
+    int  j = 0;
+    while ( p ) { 
+		p++; // 应改为`p = p->next`。 
+		j++;
+    }   
+    return  j;
+}
+
+A. 对
+B. 错

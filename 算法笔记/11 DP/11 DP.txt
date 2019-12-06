@@ -1,0 +1,280 @@
+## 什么是动态规划
+
+动态规划是一种用来解决一类最优化问题的算法思想，简单地说，动态规划将一个复杂的问题分解为若干子问题，通过综合子问题的最优解来得到原问题的最优解。
+
+如果一个问题可以被分解为若干子问题，且这些子问题会重复出现，那么称这个问题拥有重叠子问题。动态规划通过记录重叠子问题的解，来使得下次碰到相同的子问题时直接使用之前记录的结果，而不是重复求解，从而避免大量的计算。
+
+如果一个问题的最优解可以由其子问题的最优解有效地构造出来，那么称这个问题拥有最优子结构。
+
+一个问题必须拥有重叠子问题和最优子结构，才能用动态规划求解。
+
+### 问题 A: Fibonacci
+
+1. 问题中定义的fibonacci数列从0开始。
+
+```cpp
+#include <iostream>
+using namespace std;
+
+// 状态转移方程：dp[i] = dp[i-1] + dp[i-2]。
+
+// 默认初始化为0。
+int dp[31];
+
+// 动态规划的递归写法，自顶向下，从目标问题开始，将其分解为子问题的组合，直到分解到边界为止。
+int f1(int n) {
+    if (n==0 || n==1)
+        return n;
+    if (dp[n]!=0) return dp[n];
+    dp[n] = f1(n-1) + f1(n-2);
+    return dp[n];
+}
+
+// 动态规划的递推写法，自底向上，从边界开始，不断向上解决问题，直到解决了目标问题。
+void f2(int n) {
+    dp[0] = 0;
+    dp[1] = 1;
+    for (int i=2; i<=n; i++)
+        dp[i] = dp[i-1] + dp[i-2];
+}
+
+int main() {
+    int N;
+    f2(N);
+    while (cin >> N)
+        printf("%d\n", dp[N]);
+}
+```
+
+
+### 数塔问题
+
+```cpp
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+const int MAXN = 1000;
+
+int f[MAXN][MAXN], dp[MAXN][MAXN];
+
+// 状态转移方程：dp[i][j] = max(dp[i+1][j], dp[i+1][j+1]) + f[i][j]。
+// f[i][j]存储第i行第j列的数，dp[i][j]存储元素f[i][j]到最底层的多条路径中，最大的元素和。
+
+int main() {
+    int N, i, j;
+    scanf("%d", &N);
+    // 第i行有i个元素，元素f[i][j]与元素f[i+1][j]和元素f[i+1][j+1]相连。
+    for (i=1; i<=N; i++) {
+        for (j=1; j<=i; j++) {
+            scanf("%d", &f[i][j]);
+        }
+    }
+    // 边界。
+    for (j=1; j<=N; j++)
+        dp[N][j] = f[N][j];
+    // 自底而上。
+    for (i=N-1; i>=1; i--) {
+        for (j=1; j<=i; j++) {
+            dp[i][j] = max(dp[i+1][j], dp[i+1][j+1]) + f[i][j];
+        }
+    }
+    printf("%d\n", dp[1][1]);
+}
+
+// 5
+// 5
+// 8 3
+// 12 7 16
+// 4 10 11 6
+// 9 5 3 9 4
+```
+
+
+### 问题 A: 最大连续子序列
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int a[10000], dp[10000], start[10000]; // start[i]记录以元素a[i]结尾的最大连续子序列的左端点。
+
+// dp[i]表示以a[i]结尾的最大连续子序列的和。
+// 状态转移方程：dp[i] = max(dp[i-1]+a[i], a[i])。
+
+int main() {
+    /*
+    int i, j, maxSum=-1, sum;
+    int N = 6;
+    int a[] = {-2, 11, -4, 13, -5, -2};
+    // 暴力枚举左右端点。
+    for (i=0; i<N; i++) {
+        sum = 0;
+        for (j=i; j<N; j++) {
+            sum += a[j];
+            if (sum > maxSum)
+                maxSum = sum;
+        }
+    }
+    printf("%d\n", maxSum);
+    */
+    int K, i, maxDP, maxIndex;
+    scanf("%d", &K);
+    while (K) {
+        for (i=0; i<K; i++)
+            scanf("%d", a+i);
+        dp[0] = a[0];
+        start[0] = 0;
+        maxDP = a[0];
+		// 自底而上/递推。
+        for (i=1; i<K; i++) {
+            if (dp[i-1]+a[i] >= a[i]) {
+                dp[i] = dp[i-1]+a[i];
+                start[i] = start[i-1];
+            } else {
+                dp[i] = a[i];
+                start[i] = i;
+            }
+            if (dp[i] > maxDP) {
+                maxDP = dp[i];
+                maxIndex = i;
+            }
+        }
+        if (maxDP < 0)
+            printf("0 %d %d\n", a[0], a[K-1]);
+        else
+            printf("%d %d %d\n", maxDP, a[start[maxIndex]], a[maxIndex]);
+        scanf("%d", &K);
+    }
+}
+```
+
+
+### 问题 A: 最长上升子序列
+
+```cpp
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int a[1000], dp[1000]; // dp[i]表示已a[i]结尾的最长不下降子序列的长度。
+
+// 状态转移方程：dp[i] = max(1, dp[j]+1), j属于[0, i-1]。
+// 由于不是连续的子序列，故不是dp[i] = max(1, dp[i-1]+1)。
+
+int main() {
+    int N, i, j, maxDP;
+    scanf("%d", &N);
+    for (i=0; i<N; i++)
+        scanf("%d", a+i);
+    maxDP = 1;
+    for (i=0; i<N; i++) {
+        dp[i] = 1; // 边界，每个元素自成一个不下降子序列。
+        for (j=0; j<i; j++) {
+            if (a[i] >= a[j] && dp[j]+1>dp[i])
+                dp[i] = dp[j]+1;
+        }
+        if (dp[i] > maxDP)
+            maxDP = dp[i];
+    }
+    printf("%d\n", maxDP);
+}
+```
+
+
+### 问题 A: 最长公共子序列
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int dp[101][101]; // dp[i][j]表示字符串A[0, i]和B[0, j]的LCS的长度。
+
+// 边界：dp[i][0] = dp[0][j] = 0;
+// 状态转移方程：
+// dp[i][j] = dp[i-1][j-1] + 1, A[i]==B[j];
+// dp[i][j] = max(dp[i-1][j], dp[i][j-1]), A[i]!=B[j];
+
+string line, A, B;
+
+int main() {
+    int i, j;
+	// while (getline(cin, line)) { // 不知道为什么出错。
+    while (cin >> A) {
+        A = '0' + A;
+        cin >> B;
+        B = '0' + B;
+        // A = '0' + line.substr(0, line.find(' ')); // 从下标1开始存储。
+        // B = '0' + line.substr(line.find_last_of(' ')+1); // 注意，中间可能用多个空格隔开。
+        auto lenA = A.size()-1; // 注意要计算实际的字符串长度，不包含下标0的元素。
+        auto lenB = B.size()-1;
+        // 边界。
+        for (i=0; i<=lenA; i++)
+            dp[i][0] = 0;
+        for (j=0; j<=lenB; j++)
+            dp[0][j] = 0;
+        // 自底向上/从边界递推到目标问题。
+        for (i=1; i<=lenA; i++) {
+            for (j=1; j<=lenB; j++) {
+                if (A[i] == B[j])
+                    dp[i][j] = dp[i-1][j-1] + 1;
+                else
+                    dp[i][j] = max(dp[i][j-1], dp[i-1][j]);
+            }
+        }
+        printf("%d\n", dp[lenA][lenB]);
+    }
+}
+```
+
+
+### 问题 A: 【字符串】最长回文子串
+
+```cpp
+#include <iostream>
+#include <cctype>
+#include <vector>
+using namespace std;
+
+const int MAXN = 5000;
+
+// 默认初始化为false，即0值，dp[i][j]表示s[i][j]是否是回文字符串。
+bool dp[MAXN][MAXN];
+
+int main() {
+    string s;
+    getline(cin, s);
+    // 预处理s，忽略非字母字符，全部转换为小写。
+    vector<char> v;
+	// p[i]记住v[i]在s中的位置。当然也可以用计数器，累计s中的字母。不过还是前者方便。
+    vector<int> p(s.size());
+    for (int i=0; i<s.size(); i++) {
+        if (isalpha(s[i])) {
+            v.push_back(tolower(s[i]));
+            p[v.size()-1] = i;
+        }
+    }
+    int i, j, len=v.size(), ans=1, start, end;
+    for (i=0; i<len; i++) {
+        dp[i][i] = true;
+        if (i+1<len && v[i]==v[i+1]) {
+            dp[i][i+1] = true;
+            ans = 2;
+        }
+    }
+    for (int L=3; L<=len; L++) {
+        for (i=0; i+L<=len; i++) { // 枚举左端点，长度确定，则右端点也就确定了。
+            j = i+L-1; // 右端点。
+            if (v[i] == v[j] && dp[i+1][j-1]) {
+                dp[i][j] = true;
+                ans = L;
+            }
+        }
+    }
+    for (i=0; i+ans<=len; i++) {
+        if (dp[i][i+ans-1])
+            break; // 应该输出最长的回文串，如果有多个，输出起始位置最靠左的。
+    }
+    cout << s.substr(p[i], p[i+ans-1]-p[i]+1);
+}
+```
