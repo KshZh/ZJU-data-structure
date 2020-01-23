@@ -42,6 +42,7 @@ void reverse2(Node* head, int k) {
 }
 
 // 三指针。
+// 反转大小为n的block，prev是该block的前驱指针。
 Node* reverse3(Node* head, int k) {
     Node* p = head->next; // p指向已逆序好的结点。
     Node* q = p->next; // q指向要逆序的结点。
@@ -55,9 +56,9 @@ Node* reverse3(Node* head, int k) {
     // 现在，head->next指向反转后的序列的最后一个结点，p指向反转后序列的第一个结点，q指向下一个待反转序列的第一个结点或下一个不反转序列的第一个结点。
     // 如果是要求按照每k段每k段来逆序的话，就要返回head->next作为下一个待逆序序列的头结点。
     temp = head->next;
-    head->next->next = q;
     head->next = p; // 头结点连到反转后的序列的第一个结点。
-    return temp;
+    temp->next = q;
+    return temp; // 返回下一个待逆序block的前驱结点的指针。
 }
 
 void print(Node* head) {
